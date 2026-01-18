@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploader</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 85%; max-width: 350px; text-align: center; }
+        input { margin-bottom: 20px; width: 100%; }
+        button { background: #0084ff; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
+        #res { margin-top: 20px; display: none; }
+        .url { background: #eee; padding: 10px; border-radius: 4px; word-break: break-all; color: #0084ff; font-size: 14px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3>Uploader Gambar</h3>
+        <input type="file" id="inp" accept="image/*">
+        <button onclick="up()" id="btn">Upload</button>
+        <div id="res">
+            <div class="url" id="link" onclick="copy()"></div>
+        </div>
+    </div>
+    <script>
+        async function up() {
+            const inp = document.getElementById('inp');
+            const btn = document.getElementById('btn');
+            const resDiv = document.getElementById('res');
+            const linkDiv = document.getElementById('link');
+            if (inp.files.length === 0) return alert("Pilih file!");
+            const fd = new FormData();
+            fd.append("image", inp.files[0]);
+            btn.innerText = "Proses...";
+            btn.disabled = true;
+            try {
+                const r = await fetch('/api/upload', { method: "POST", body: fd });
+                const d = await r.json();
+                if (d.success) {
+                    resDiv.style.display = "block";
+                    linkDiv.innerText = d.url;
+                } else {
+                    alert("Gagal upload");
+                }
+            } catch (e) {
+                alert("Error koneksi");
+            } finally {
+                btn.innerText = "Upload";
+                btn.disabled = false;
+            }
+        }
+        function copy() {
+            const text = document.getElementById('link').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Link dicopy!");
+        }
+    </script>
+</body>
+</html>
